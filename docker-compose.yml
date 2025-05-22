@@ -10,13 +10,10 @@ services:
     ports:
       - 8080:8080
     restart: unless-stopped
-    depends_on:
-      monitoring_db:
-        condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://monitoring_db:5432/server_monitor
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_DATASOURCE_URL: jdbc:postgresql://ep-orange-mouse-a53dvofw-pooler.us-east-2.aws.neon.tech/monitoring_db?sslmode=require
+      SPRING_DATASOURCE_USERNAME: monitoring_db_owner
+      SPRING_DATASOURCE_PASSWORD: npg_0FDrhHGC5tgK
       SPRING_PROFILES_ACTIVE: docker
       VAADIN_PRODUCTION_MODE: "true"
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
@@ -25,34 +22,10 @@ services:
     networks:
       - monitoring_network
 
-  monitoring_db:
-    container_name: monitoring_db
-    image: postgres:latest
-    ports:
-      - 5433:5432
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: server_monitor
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      # Script de inicialización opcional para preparar la base de datos
-      - ./init-scripts:/docker-entrypoint-initdb.d
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - monitoring_network
-
 networks:
   monitoring_network:
     driver: bridge
 
 volumes:
-  postgres_data:
-    name: monitoring_postgres_data
   app_logs:
     name: monitoring_app_logs
